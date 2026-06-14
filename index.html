@@ -42,12 +42,19 @@
 </head>
 <body>
 <iframe
-  src="https://script.google.com/macros/s/AKfycbw-gLBv1_Ch0YUHm2-ZfKaebZ3zwtlOnTROsyd9Xr7HqY9Uc1ORcfpJrMNAk3XcvMMa/exec"
+  id="app"
   allow="camera; microphone"
   allowfullscreen
 ></iframe>
 <div id="fallback">
-  うまく表示されない場合は<a href="https://script.google.com/macros/s/AKfycbw-gLBv1_Ch0YUHm2-ZfKaebZ3zwtlOnTROsyd9Xr7HqY9Uc1ORcfpJrMNAk3XcvMMa/exec" target="_top">こちら</a>
+  うまく表示されない場合は<a id="fallbackLink" target="_top">こちら</a>
 </div>
+<script>
+  var GAS_URL = "https://script.google.com/macros/s/AKfycbw-gLBv1_Ch0YUHm2-ZfKaebZ3zwtlOnTROsyd9Xr7HqY9Uc1ORcfpJrMNAk3XcvMMa/exec";
+  // このページのURLに付いているクエリ(?p=apply&e=...など)をそのままGASに渡す
+  var target = GAS_URL + window.location.search;
+  document.getElementById('app').src = target;
+  document.getElementById('fallbackLink').href = target;
+</script>
 </body>
 </html>
