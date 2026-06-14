@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>IMAGINE.COFFEEイベント</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#a32020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="IMAGINE.COFFEE">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #ffffff;
+  }
+  iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  #fallback {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    text-align: center;
+    font-size: 12px;
+    padding: 6px 0;
+    background: rgba(255,255,255,0.9);
+    color: #888;
+  }
+  #fallback a { color: #a32020; }
+</style>
+</head>
+<body>
+<iframe
+  src="https://script.google.com/macros/s/AKfycbw-gLBv1_Ch0YUHm2-ZfKaebZ3zwtlOnTROsyd9Xr7HqY9Uc1ORcfpJrMNAk3XcvMMa/exec"
+  allow="camera; microphone"
+  allowfullscreen
+></iframe>
+<div id="fallback">
+  うまく表示されない場合は<a href="https://script.google.com/macros/s/AKfycbw-gLBv1_Ch0YUHm2-ZfKaebZ3zwtlOnTROsyd9Xr7HqY9Uc1ORcfpJrMNAk3XcvMMa/exec" target="_top">こちら</a>
+</div>
+</body>
+</html>
