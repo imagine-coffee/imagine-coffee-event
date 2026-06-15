@@ -1,60 +1,1455 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>IMAGINE.COFFEEイベント</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#a32020">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="IMAGINE.COFFEE">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" href="icon-192.png">
+<base target="_top">
+<meta charset="utf-8">
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    background: #ffffff;
-  }
-  iframe {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-  }
-  #fallback {
-    position: fixed;
-    left: 0; right: 0; bottom: 0;
-    text-align: center;
-    font-size: 12px;
-    padding: 6px 0;
-    background: rgba(255,255,255,0.9);
-    color: #888;
-  }
-  #fallback a { color: #a32020; }
+:root{
+  --bg:#f4f4f6; --card:#fff; --ink:#1b1b1f; --sub:#8a8a90;
+  --line:#e7e7ec; --accent:#111; --ok:#2e9e5b; --warn:#c0392b;
+  --radius:18px;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0;}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;
+  font-size:15px; line-height:1.6;
+}
+#wrap{max-width:520px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative;}
+
+/* ---------- ヘッダー ---------- */
+header{
+  position:sticky; top:0; z-index:50; background:#fff;
+  display:flex; align-items:center; gap:8px;
+  padding:12px 14px; border-bottom:1px solid var(--line);
+}
+.hbtn{
+  width:42px; height:42px; border:none; background:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; flex:none;
+  font-size:22px; color:var(--ink); border-radius:12px;
+}
+.hbtn:active{background:#f0f0f3;}
+#siteTitle{
+  flex:1; text-align:center; font-weight:800; font-size:17px;
+  letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+#siteTitle small{display:block; font-weight:600; font-size:10px; color:var(--sub); letter-spacing:.1em;}
+
+/* ---------- 検索 ---------- */
+.searchwrap{display:flex; gap:8px; align-items:center; background:#ededf1; border-radius:999px; padding:4px 6px 4px 18px; margin:14px;}
+.searchwrap input{flex:1; border:none; background:none; font-size:15px; outline:none; padding:8px 0; color:var(--ink);}
+.searchwrap .sicon{width:38px; height:38px; border-radius:50%; background:#111; color:#fff; display:flex; align-items:center; justify-content:center; flex:none; font-size:16px;}
+
+/* ---------- リスト行(イベント一覧) ---------- */
+.rows{background:#fff; border-radius:var(--radius); margin:0 14px 14px; overflow:hidden; border:1px solid var(--line);}
+.row{
+  display:flex; align-items:center; gap:12px; padding:15px 16px;
+  border-bottom:1px solid var(--line); cursor:pointer; background:#fff; width:100%; text-align:left; border-left:none; border-right:none; border-top:none; font:inherit; color:inherit;
+}
+.row:last-child{border-bottom:none;}
+.row:active{background:#f6f6f8;}
+.row .ricon{font-size:22px; flex:none; width:36px; text-align:center;}
+.row .rbody{flex:1; min-width:0;}
+.row .rname{font-weight:700; font-size:15px;}
+.row .rsub{font-size:12px; color:var(--sub);}
+.row .chev{color:#bbb; font-size:18px; flex:none;}
+
+/* ---------- グリッド(出店者カード) ---------- */
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 14px 20px;}
+.tile{
+  background:#fff; border-radius:20px; border:1px solid var(--line);
+  padding:0; overflow:hidden; cursor:pointer; text-align:left; font:inherit; color:inherit;
+  display:flex; flex-direction:column;
+}
+.tile:active{transform:scale(.98);}
+.tile .timg{width:100%; aspect-ratio:4/3; object-fit:cover; background:#f0f0f3; display:block;}
+.tile .tph{width:100%; aspect-ratio:4/3; display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:800; color:#c9c9d2; background:#f6f6f8;}
+.tile .tbody{padding:10px 12px 12px;}
+.tile .tname{font-weight:700; font-size:14px; line-height:1.4;}
+.tile .tcat{font-size:11px; color:var(--sub); margin-top:2px;}
+.tile .tdone{display:inline-block; font-size:10px; color:var(--ok); font-weight:700; margin-top:4px;}
+
+/* ---------- チップ ---------- */
+.chips{display:flex; gap:8px; overflow-x:auto; padding:0 14px 12px; -webkit-overflow-scrolling:touch; scrollbar-width:none;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{
+  flex:none; border:1px solid var(--line); background:#fff; border-radius:999px;
+  padding:7px 14px; font-size:13px; cursor:pointer; color:var(--ink); font:inherit;
+}
+.chip.on{background:#111; color:#fff; border-color:#111;}
+
+/* ---------- 汎用 ---------- */
+.section{padding:0 14px 14px;}
+.card{background:#fff; border-radius:var(--radius); border:1px solid var(--line); padding:16px; margin-bottom:12px;}
+.card h3{margin:0 0 10px; font-size:14px; color:var(--sub); font-weight:700; letter-spacing:.05em;}
+.btn{
+  display:block; width:100%; border:none; border-radius:999px; padding:14px;
+  background:#111; color:#fff; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
+  text-align:center; text-decoration:none;
+}
+.btn:active{opacity:.8;}
+.btn.ghost{background:#fff; color:var(--ink); border:1.5px solid var(--ink);}
+.btn.mini{display:inline-block; width:auto; padding:8px 16px; font-size:13px;}
+.btn.danger{background:#fff; color:var(--warn); border:1.5px solid var(--warn);}
+.btn[disabled]{opacity:.4; pointer-events:none;}
+.btnrow{display:flex; gap:8px;}
+.btnrow .btn{flex:1;}
+.back{
+  display:inline-flex; align-items:center; gap:4px; border:none; background:none;
+  color:var(--sub); font-size:14px; cursor:pointer; padding:14px; font-family:inherit;
+}
+.pagetitle{padding:0 18px 4px; font-size:21px; font-weight:800; line-height:1.4;}
+.pagesub{padding:0 18px 14px; font-size:13px; color:var(--sub);}
+.badge{display:inline-block; font-size:11px; font-weight:700; border-radius:999px; padding:2px 10px; margin-right:4px;}
+.badge.open{background:#e3f4ea; color:var(--ok);}
+.badge.closed{background:#fdeaea; color:var(--warn);}
+.badge.hidden{background:#eee; color:#888;}
+.badge.pub{background:#e8f0fe; color:#3367d6;}
+.empty{text-align:center; color:var(--sub); padding:40px 20px; font-size:14px;}
+.progress{height:8px; background:#e7e7ec; border-radius:99px; overflow:hidden;}
+.progress i{display:block; height:100%; background:#111; border-radius:99px;}
+
+/* ---------- モノグラム・イベントヒーロー ---------- */
+.mono{
+  width:38px; height:38px; border-radius:12px; background:#ededf1; flex:none;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:15px; color:#555;
+}
+.evhero{
+  background:#111; color:#fff; border-radius:22px; margin:6px 14px 16px;
+  padding:24px 20px; text-align:center;
+}
+.evhero .ehname{font-size:20px; font-weight:800; line-height:1.4;}
+.evhero .ehdate{font-size:13px; margin-top:6px; opacity:.9;}
+.evhero .ehtime{
+  display:inline-block; margin-top:10px; font-size:13px; font-weight:700;
+  letter-spacing:.08em; border:1px solid rgba(255,255,255,.4); border-radius:999px; padding:5px 16px;
+}
+.evhero .ehdesc{font-size:13px; margin-top:12px; opacity:.85; white-space:pre-wrap; text-align:center;}
+
+/* ---------- フォーム ---------- */
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:13px; font-weight:700; margin-bottom:6px;}
+.field label .req{color:var(--warn); font-size:11px; margin-left:4px;}
+.field input[type=text],.field input[type=date],.field input[type=time],.field input[type=password],.field input[type=url],.field input[type=tel],
+.field select,.field textarea{
+  width:100%; border:1.5px solid var(--line); border-radius:14px; padding:12px 14px;
+  font-size:16px; font-family:inherit; background:#fff; color:var(--ink); outline:none;
+}
+.field textarea{min-height:110px; resize:vertical;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#111;}
+.field .hint{font-size:11px; color:var(--sub); margin-top:4px;}
+.checkline{display:flex; align-items:center; gap:10px; padding:8px 0; font-size:15px;}
+.checkline input{width:20px; height:20px;}
+
+/* ---------- 写真 ---------- */
+.photoadd{
+  border:2px dashed #ccc; border-radius:14px; padding:18px; text-align:center;
+  color:var(--sub); font-size:14px; cursor:pointer; background:#fafafa;
+}
+.thumbs{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+.thumb{position:relative; width:76px; height:76px;}
+.thumb img{width:100%; height:100%; object-fit:cover; border-radius:12px; border:1px solid var(--line);}
+.thumb .del{
+  position:absolute; top:-7px; right:-7px; width:24px; height:24px; border-radius:50%;
+  background:#111; color:#fff; border:2px solid #fff; font-size:12px; cursor:pointer; line-height:1;
+}
+.photoscroll{display:flex; gap:10px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px;}
+.photoscroll img{height:200px; border-radius:14px; flex:none; max-width:85%; object-fit:cover;}
+
+/* ---------- ボトムシート ---------- */
+#sheetbg{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:90; display:none;}
+#sheet{
+  position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:520px;
+  max-height:88vh; overflow-y:auto; background:#fff; border-radius:24px 24px 0 0;
+  z-index:91; display:none; padding:10px 18px 30px; -webkit-overflow-scrolling:touch;
+}
+#sheet .grip{width:42px; height:5px; border-radius:99px; background:#ddd; margin:6px auto 14px;}
+
+/* ---------- メニュー ---------- */
+#menu{
+  position:fixed; inset:0; background:#fff; z-index:80; display:none; overflow-y:auto;
+}
+#menu .inner{max-width:520px; margin:0 auto;}
+.menuline{
+  display:flex; align-items:center; gap:14px; width:100%; padding:18px 20px;
+  border:none; border-bottom:1px solid var(--line); background:none; font:inherit;
+  font-size:16px; font-weight:600; cursor:pointer; text-align:left; color:var(--ink);
+}
+.menuline .micon{font-size:20px; width:28px; text-align:center;}
+.menuline .chev{margin-left:auto; color:#bbb;}
+
+/* ---------- その他 ---------- */
+#toast{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+  background:#111; color:#fff; padding:11px 22px; border-radius:999px; font-size:13px;
+  z-index:99; display:none; white-space:nowrap; box-shadow:0 6px 20px rgba(0,0,0,.25);
+}
+.loading{text-align:center; padding:60px 0; color:var(--sub);}
+#app{padding-bottom:88px;}
+#tabbar{
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:520px; background:#fff; border-top:1px solid var(--line);
+  display:flex; z-index:60; padding-bottom:env(safe-area-inset-bottom);
+}
+#tabbar button{
+  flex:1; border:none; background:none; font-family:inherit; font-size:11px; font-weight:700;
+  color:#a5a5ad; padding:10px 0 8px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+}
+#tabbar button.on{color:var(--ink);}
+.crumb{padding:0 18px 2px; font-size:11px; color:var(--sub); font-weight:700; letter-spacing:.04em;}
+.spin{
+  width:30px; height:30px; border:3px solid #ddd; border-top-color:#111; border-radius:50%;
+  margin:0 auto 12px; animation:sp 1s linear infinite;
+}
+@keyframes sp{to{transform:rotate(360deg)}}
+.kv{display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); font-size:14px;}
+.kv:last-child{border-bottom:none;}
+.kv .k{color:var(--sub); flex:none; width:35%;}
+.kv .v{flex:1; white-space:pre-wrap; word-break:break-word;}
+.prewrap{white-space:pre-wrap; word-break:break-word;}
+.guidebox{background:#fff; border-radius:var(--radius); border:1px solid var(--line); padding:16px;}
+.guidebox summary{font-size:14px; font-weight:700; letter-spacing:.05em; color:var(--sub); cursor:pointer; list-style:none; position:relative; padding-right:24px;}
+.guidebox summary::-webkit-details-marker{display:none;}
+.guidebox summary::after{content:'▾'; position:absolute; right:0; top:0; transition:transform .2s;}
+.guidebox[open] summary::after{transform:rotate(180deg);}
+.guidebox .prewrap{margin-top:10px; padding-top:10px; border-top:1px solid var(--line); font-size:14px; line-height:1.7;}
+.switchline{display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--line);}
+.switchline:last-child{border-bottom:none;}
+.switchline .sl{font-size:14px; font-weight:600;}
+.switchline .sd{font-size:11px; color:var(--sub);}
+.sw{position:relative; width:50px; height:30px; flex:none;}
+.sw input{opacity:0; width:0; height:0;}
+.sw i{
+  position:absolute; inset:0; background:#ddd; border-radius:99px; cursor:pointer; transition:.2s;
+}
+.sw i:before{
+  content:''; position:absolute; width:24px; height:24px; border-radius:50%;
+  background:#fff; top:3px; left:3px; transition:.2s; box-shadow:0 1px 4px rgba(0,0,0,.3);
+}
+.sw input:checked + i{background:var(--ok);}
+.sw input:checked + i:before{left:23px;}
+.qcard{border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:10px; background:#fafafa;}
+.qcard .qtop{display:flex; gap:6px; align-items:center; margin-bottom:8px;}
+.qcard .qtop input[type=text]{flex:1; border:1.5px solid var(--line); border-radius:10px; padding:8px 10px; font-size:14px; font-family:inherit;}
+.qcard select{border:1.5px solid var(--line); border-radius:10px; padding:8px; font-size:13px; font-family:inherit; background:#fff;}
+.qcard .qops{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:8px 10px; font-size:13px; font-family:inherit; margin-top:6px;}
+.qcard .qfoot{display:flex; align-items:center; gap:10px; margin-top:8px; font-size:12px;}
+.qcard .qbtn{border:none; background:#eee; border-radius:8px; width:30px; height:30px; cursor:pointer; font-size:14px;}
+.bar{display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:13px;}
+.bar .blabel{flex:none; width:40%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.bar .btrack{flex:1; height:14px; background:#eee; border-radius:99px; overflow:hidden;}
+.bar .bfill{height:100%; background:#111; border-radius:99px; min-width:2px;}
+.bar .bnum{flex:none; font-weight:700; width:28px; text-align:right;}
 </style>
 </head>
 <body>
-<iframe
-  id="app"
-  allow="camera; microphone"
-  allowfullscreen
-></iframe>
-<div id="fallback">
-  うまく表示されない場合は<a id="fallbackLink" target="_top">こちら</a>
+<div id="wrap">
+  <header>
+    <button class="hbtn" id="menuBtn" onclick="toggleMenu()">☰</button>
+    <div id="siteTitle"><small>EVENT PORTAL</small><span id="siteTitleText"></span></div>
+    <div style="width:42px;flex:none"></div>
+  </header>
+  <main id="app"></main>
+  <nav id="tabbar">
+    <button id="tabHome" onclick="tabGo('home')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      ホーム
+    </button>
+    <button id="tabAdmin" onclick="tabGo('admin')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3"/><path d="M1 14h6M9 8h6M17 16h6"/></svg>
+      管理
+    </button>
+  </nav>
 </div>
+
+<div id="menu"><div class="inner" id="menuInner"></div></div>
+<div id="sheetbg" onclick="closeSheet()"></div>
+<div id="sheet"></div>
+<div id="toast"></div>
+
 <script>
-  var GAS_URL = "https://script.google.com/macros/s/AKfycbw-gLBv1_Ch0YUHm2-ZfKaebZ3zwtlOnTROsyd9Xr7HqY9Uc1ORcfpJrMNAk3XcvMMa/exec";
-  // このページのURLに付いているクエリ(?p=apply&e=...など)をそのままGASに渡す
-  var target = GAS_URL + window.location.search;
-  document.getElementById('app').src = target;
-  document.getElementById('fallbackLink').href = target;
+const BOOT = <?!= boot ?>;
+
+// ---------------- 基盤 ----------------
+const state = {
+  pin: sessionStorage.getItem('portal_pin') || '',
+  home: null,           // api_getHome キャッシュ
+  events: {},           // eventId -> api_getEvent キャッシュ
+  catFilter: 'すべて',
+  searchText: '',
+};
+
+function $(s){ return document.querySelector(s); }
+const SICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>';
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function gs(fn){
+  const args = Array.prototype.slice.call(arguments, 1);
+  return new Promise(function(res, rej){
+    const runner = google.script.run
+      .withSuccessHandler(res)
+      .withFailureHandler(function(e){ rej(new Error(e && e.message ? e.message : '通信エラーが発生しました')); });
+    runner[fn].apply(runner, args);
+  });
+}
+function show(html){ closeSheet(); setMenuBtn(true); $('#app').innerHTML = html; window.scrollTo(0,0); }
+function setMenuBtn(visible){
+  closeMenu();
+  $('#menuBtn').style.display = visible ? '' : 'none';
+}
+function loadingHTML(msg){ return '<div class="loading"><div class="spin"></div>' + esc(msg || '読み込み中…') + '</div>'; }
+function errHTML(e){ return '<div class="empty">' + esc(e.message) + '</div>'; }
+
+let toastTimer = null;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.style.display = 'none'; }, 2200);
+}
+
+function copyText(text, doneMsg){
+  function fallback(){
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try{ document.execCommand('copy'); toast(doneMsg || 'コピーしました'); }
+    catch(e){ toast('コピーできませんでした'); }
+    document.body.removeChild(ta);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(function(){ toast(doneMsg || 'コピーしました'); })
+      .catch(fallback);
+  } else fallback();
+}
+
+function photoUrl(id, w){ return 'https://lh3.googleusercontent.com/d/' + id + '=w' + (w || 800); }
+function fmtDate(d){
+  if (!d) return '';
+  const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return String(d);
+  const dt = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const wd = ['日','月','火','水','木','金','土'][dt.getDay()];
+  return m[1] + '/' + Number(m[2]) + '/' + Number(m[3]) + '(' + wd + ')';
+}
+
+function initialOf(s){ s = String(s || '').trim(); return s ? s.charAt(0).toUpperCase() : '・'; }
+function fmtTime(t){ return String(t || '').replace(/^0(\d:)/, '$1'); }
+function fmtTimeRange(open, close){
+  if (!open && !close) return '';
+  if (open && close) return fmtTime(open) + '〜' + fmtTime(close);
+  return open ? fmtTime(open) + '〜' : '〜' + fmtTime(close);
+}
+
+// ---------------- メニュー ----------------
+let menuOpen = false;
+function toggleMenu(){
+  menuOpen = !menuOpen;
+  $('#menuBtn').textContent = menuOpen ? '✕' : '☰';
+  $('#menu').style.display = menuOpen ? 'block' : 'none';
+  if (menuOpen) renderMenu();
+}
+function closeMenu(){ if (menuOpen) toggleMenu(); }
+function renderMenu(){
+  let evHtml = '';
+  if (state.home) {
+    evHtml = state.home.events.map(function(ev){
+      return '<button class="menuline" onclick="closeMenu();viewEvent(\'' + ev.id + '\')">' +
+        esc(ev.name) + '<span class="chev">›</span></button>';
+    }).join('');
+  }
+  $('#menuInner').innerHTML =
+    '<button class="menuline" onclick="closeMenu();viewHome()">ホーム<span class="chev">›</span></button>' +
+    evHtml +
+    '<button class="menuline" onclick="closeMenu();goAdmin()">管理画面<span class="chev">›</span></button>';
+}
+
+// ---------------- タブバー ----------------
+function setTab(side){
+  const bar = $('#tabbar');
+  if (!side) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  $('#tabHome').classList.toggle('on', side === 'home');
+  $('#tabAdmin').classList.toggle('on', side === 'admin');
+}
+function tabGo(side){
+  closeMenu();
+  if (side === 'home') viewHome(); else goAdmin();
+}
+function crumb(t){ return '<div class="crumb">' + t + '</div>'; }
+
+// ---------------- ボトムシート ----------------
+function openSheet(html){
+  $('#sheet').innerHTML = '<div class="grip"></div>' + html;
+  $('#sheet').style.display = 'block';
+  $('#sheetbg').style.display = 'block';
+  $('#sheet').scrollTop = 0;
+}
+function closeSheet(){
+  $('#sheet').style.display = 'none';
+  $('#sheetbg').style.display = 'none';
+}
+
+// ---------------- 起動 ----------------
+function init(){
+  $('#siteTitleText').textContent = BOOT.siteTitle;
+  if (BOOT.page === 'apply' && BOOT.eventId) viewApply(BOOT.eventId);
+  else if (BOOT.page === 'edit' && BOOT.token) viewEditByToken(BOOT.token);
+  else if (BOOT.page === 'admin') goAdmin();
+  else viewHome();
+}
+window.addEventListener('load', init);
+// ================================================================
+// ホーム(イベント一覧)
+// ================================================================
+function viewHome(force){
+  setTab('home');
+  show(loadingHTML());
+  const p = (state.home && !force) ? Promise.resolve(state.home) : gs('api_getHome');
+  p.then(function(data){
+    state.home = data;
+    $('#siteTitleText').textContent = data.siteTitle || BOOT.siteTitle;
+    let html =
+      '<div class="searchwrap"><input id="homeSearch" type="text" placeholder="イベントを検索" oninput="filterHome()"><span class="sicon">' + SICON + '</span></div>' +
+      '<div class="pagesub" style="padding-top:2px">これまでのイベント</div>';
+    if (!data.events.length) {
+      html += '<div class="empty">まだイベントがありません。<br>右上の「管理」から管理画面を開いて<br>最初のイベントを作りましょう!</div>';
+    } else {
+      html += '<div class="rows" id="homeRows">' + data.events.map(homeRow).join('') + '</div>';
+    }
+    show(html);
+  }).catch(function(e){ show(errHTML(e)); });
+}
+function homeRow(ev){
+  const open = ev.status === 'open';
+  return '<button class="row" data-name="' + esc(ev.name) + '" onclick="viewEvent(\'' + ev.id + '\')">' +
+    '<span class="mono">' + esc(initialOf(ev.name)) + '</span>' +
+    '<span class="rbody"><span class="rname">' + esc(ev.name) + '</span><br>' +
+    '<span class="rsub">' + esc(fmtDate(ev.date)) + ' ・ ' + ev.entryCount + '店 ' +
+    (open ? '<span class="badge open">募集中</span>' : '<span class="badge closed">締切</span>') +
+    '</span></span><span class="chev">›</span></button>';
+}
+function filterHome(){
+  const q = $('#homeSearch').value.trim();
+  document.querySelectorAll('#homeRows .row').forEach(function(r){
+    r.style.display = (!q || r.getAttribute('data-name').indexOf(q) !== -1) ? '' : 'none';
+  });
+}
+
+// ================================================================
+// イベントページ(出店者一覧)
+// ================================================================
+function viewEvent(eventId, force){
+  setTab('home');
+  show(loadingHTML());
+  state.catFilter = 'すべて'; state.searchText = '';
+  const cached = state.events[eventId];
+  const usable = cached && !force && (!state.pin || cached._admin);
+  const p = usable
+    ? Promise.resolve(cached)
+    : gs('api_getEvent', eventId, state.pin || '').then(function(d){ d._admin = !!state.pin; return d; });
+  p.then(function(data){
+    state.events[eventId] = data;
+    renderEvent(eventId);
+  }).catch(function(e){ show(errHTML(e)); });
+}
+
+function renderEvent(eventId){
+  const data = state.events[eventId];
+  const ev = data.event;
+  const cats = ['すべて'];
+  data.entries.forEach(function(en){
+    if (en.category && cats.indexOf(en.category) === -1) cats.push(en.category);
+  });
+  const posted = data.entries.filter(function(e){ return e.posted; }).length;
+  const total = data.entries.length;
+  const pct = total ? Math.round(posted / total * 100) : 0;
+
+  let html =
+    '<button class="back" onclick="viewHome()">‹ ホーム</button>' +
+    '<div class="pagetitle">' + esc(ev.name) + '</div>' +
+    '<div class="pagesub">' + esc(fmtDate(ev.date)) +
+      ((ev.openTime || ev.closeTime) ? ' ・ ' + esc(fmtTimeRange(ev.openTime, ev.closeTime)) : '') +
+      (ev.status === 'open' ? ' <span class="badge open">募集中</span>' : ' <span class="badge closed">締切</span>') +
+      (ev.description ? '<br>' + esc(ev.description) : '') + '</div>';
+
+  if (state.pin) {
+    html += '<div style="padding:0 18px 12px"><button class="btn ghost mini" onclick="viewAdminEvent(\'' + eventId + '\')">このイベントを管理</button></div>';
+  }
+
+  if (total) {
+    html += '<div class="section"><div class="card" style="padding:12px 16px">' +
+      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">' +
+      '<b>ストーリー投稿の進み具合</b><span>' + posted + ' / ' + total + '店</span></div>' +
+      '<div class="progress"><i style="width:' + pct + '%"></i></div></div></div>';
+  }
+
+  html += '<div class="searchwrap" style="margin-top:0"><input type="text" placeholder="お店をさがす" value="' + esc(state.searchText) + '" oninput="state.searchText=this.value;renderEventGrid(\'' + eventId + '\')"><span class="sicon">' + SICON + '</span></div>';
+  html += '<div class="chips">' + cats.map(function(c){
+    return '<button class="chip' + (state.catFilter === c ? ' on' : '') + '" onclick="state.catFilter=\'' + esc(c) + '\';renderEvent(\'' + eventId + '\')">' +
+      esc(c) + '</button>';
+  }).join('') + '</div>';
+  html += '<div id="evGrid"></div>';
+  show(html);
+  renderEventGrid(eventId);
+}
+
+function renderEventGrid(eventId){
+  const data = state.events[eventId];
+  const q = state.searchText.trim();
+  const list = data.entries.filter(function(en){
+    if (state.catFilter !== 'すべて' && en.category !== state.catFilter) return false;
+    if (q && (en.shopName + en.intro).indexOf(q) === -1) return false;
+    return true;
+  });
+  let html;
+  if (!list.length) {
+    html = '<div class="empty">' + (data.entries.length ? '条件に合うお店がありません' : 'まだ出店申込がありません') + '</div>';
+  } else {
+    html = '<div class="grid">' + list.map(function(en){
+      const img = en.photoIds.length
+        ? '<img class="timg" src="' + photoUrl(en.photoIds[0], 400) + '" loading="lazy" alt="">'
+        : '<div class="tph">' + esc(initialOf(en.shopName)) + '</div>';
+      return '<button class="tile" onclick="openEntryDetail(\'' + eventId + '\',\'' + en.id + '\')">' + img +
+        '<span class="tbody"><span class="tname">' + esc(en.shopName) + '</span>' +
+        '<span class="tcat">' + esc(en.category || '') + '</span>' +
+        (en.posted ? '<span class="tdone">✓ 投稿済み</span>' : '') +
+        '</span></button>';
+    }).join('') + '</div>';
+  }
+  $('#evGrid').innerHTML = html;
+}
+
+// ================================================================
+// 出店者詳細(ボトムシート)
+// ================================================================
+function igOf(en){
+  const v = String(en.instagram || '').trim();
+  if (!v) return '';
+  return v.charAt(0) === '@' ? v : '@' + v;
+}
+function buildPostText(ev, en){
+  const tpl = ev.template || '{店名}\n{インスタID}\n{紹介文}';
+  return tpl
+    .replace(/\{店名\}/g, en.shopName)
+    .replace(/\{カテゴリ\}/g, en.category || '')
+    .replace(/\{紹介文\}/g, en.intro || '')
+    .replace(/\{インスタID\}/g, igOf(en))
+    .replace(/\{イベント名\}/g, ev.name)
+    .replace(/\n{3,}/g, '\n\n'); // 空項目で行が空きすぎないように
+}
+
+function openEntryDetail(eventId, entryId){
+  const data = state.events[eventId];
+  const en = data.entries.filter(function(e){ return e.id === entryId; })[0];
+  if (!en) return;
+  const ev = data.event;
+
+  let photos = '';
+  if (en.photoIds.length) {
+    photos = '<div class="photoscroll">' + en.photoIds.map(function(id){
+      return '<img src="' + photoUrl(id, 1000) + '" alt="" onclick="window.open(\'' + photoUrl(id, 2000) + '\',\'_blank\')">';
+    }).join('') + '</div>' +
+    '<div style="font-size:11px;color:var(--sub);margin:4px 0 12px">画像を長押し(またはタップで拡大)して保存できます</div>';
+  }
+
+  function kvLine(label, value){
+    return '<div class="kv"><span class="k">' + esc(label) + '</span>' +
+      (value
+        ? '<span class="v">' + esc(value) + '</span>'
+        : '<span class="v" style="color:#bbb">未入力</span>') +
+      '</div>';
+  }
+  const reg =
+    kvLine('出店者名', en.vendorName) +
+    kvLine('連絡先', en.phone) +
+    kvLine('Instagram', igOf(en)) +
+    kvLine('メール', en.email) +
+    kvLine('カテゴリ', en.category) +
+    kvLine('提供内容', en.offering) +
+    data.questions.map(function(q){ return kvLine(q.label, en.answers[q.id]); }).join('');
+
+  const req = en.request
+    ? '<div class="card" style="background:#fffbe8"><h3>運営への要望</h3><div class="prewrap" style="font-size:14px">' + esc(en.request) + '</div></div>'
+    : '';
+
+  const isAdmin = !!state.pin;
+  // 一般公開フラグONのイベントを未ログインで見た場合は、内部情報と運営操作を隠す
+  const publicView = data.event.isPublic && !isAdmin;
+
+  let ops = '';
+  if (!publicView) {
+    ops =
+      '<button class="btn" style="margin-bottom:10px" onclick="copyPost(\'' + eventId + '\',\'' + entryId + '\')">投稿用テキストをコピー</button>' +
+      '<div class="card" style="padding:6px 16px"><div class="switchline">' +
+        '<div><div class="sl">ストーリー投稿済み</div><div class="sd">投稿が終わったらONに</div></div>' +
+        '<label class="sw"><input type="checkbox" ' + (en.posted ? 'checked' : '') + ' onchange="togglePosted(\'' + eventId + '\',\'' + entryId + '\',this.checked)"><i></i></label>' +
+      '</div></div>';
+  }
+
+  let adminOps = '';
+  if (isAdmin) {
+    window._homeEditUrl = BOOT.appUrl + '?p=edit&t=' + (en.editToken || '');
+    adminOps =
+      '<button class="btn ghost" style="margin-bottom:8px" onclick="homeEditEntry(\'' + eventId + '\',\'' + entryId + '\')">内容を編集する</button>' +
+      (en.editToken ? '<button class="btn ghost" style="margin-bottom:8px" onclick="copyText(window._homeEditUrl,\'編集リンクをコピーしました\')">出店者用の編集リンクをコピー</button>' : '') +
+      '<button class="btn danger" style="margin-bottom:8px" onclick="homeTrashEntry(\'' + eventId + '\',\'' + entryId + '\')">ゴミ箱へ移動</button>';
+  }
+
+  openSheet(
+    '<div style="font-size:20px;font-weight:800;margin-bottom:2px">' + esc(en.shopName) + '</div>' +
+    '<div style="font-size:13px;color:var(--sub);margin-bottom:14px">' + esc(en.category || 'カテゴリ未設定') + '</div>' +
+    photos +
+    (publicView ? '' : '<div class="card"><h3>登録内容</h3>' + reg + '</div>') +
+    (en.intro ? '<div class="card"><h3>紹介文</h3><div class="prewrap" style="font-size:14px">' + esc(en.intro) + '</div></div>' : '') +
+    (publicView ? '' : req) +
+    ops + adminOps +
+    '<button class="btn ghost" onclick="closeSheet()">閉じる</button>'
+  );
+}
+
+function homeEditEntry(eventId, entryId){
+  closeSheet();
+  const data = state.events[eventId];
+  const en = data.entries.filter(function(e){ return e.id === entryId; })[0];
+  renderEntryForm({
+    mode: 'admin', returnTo: 'home',
+    event: data.event, questions: data.questions, categories: data.categories, entry: en,
+  });
+}
+
+function homeTrashEntry(eventId, entryId){
+  gs('api_adminSetEntryStatus', adminPin(), entryId, 'trash').then(function(){
+    state.events = {}; state.home = null;
+    toast('ゴミ箱に移動しました(復元は管理画面から)');
+    closeSheet();
+    viewEvent(eventId, true);
+  }).catch(function(e){ toast(e.message); });
+}
+
+function copyPost(eventId, entryId){
+  const data = state.events[eventId];
+  const en = data.entries.filter(function(e){ return e.id === entryId; })[0];
+  copyText(buildPostText(data.event, en), '投稿用テキストをコピーしました');
+}
+
+function togglePosted(eventId, entryId, val){
+  const data = state.events[eventId];
+  const en = data.entries.filter(function(e){ return e.id === entryId; })[0];
+  en.posted = val;
+  gs('api_togglePosted', entryId, val)
+    .then(function(){ toast(val ? '投稿済みにしました' : '未投稿に戻しました'); })
+    .catch(function(e){ en.posted = !val; toast(e.message); });
+}
+// ================================================================
+// 申込フォーム(新規・編集・管理者編集 共通)
+// ================================================================
+let formCtx = null; // {mode:'apply'|'edit'|'admin', event, questions, categories, entry, token, keepIds, newFiles}
+
+function questionField(q, value){
+  const req = q.required ? '<span class="req">必須</span>' : '';
+  const opts = String(q.options).split(/[,、]/).map(function(s){ return s.trim(); }).filter(String);
+  let inner = '';
+  if (q.type === 'textarea') {
+    inner = '<textarea data-qid="' + q.id + '" style="min-height:80px">' + esc(value || '') + '</textarea>';
+  } else if (q.type === 'select') {
+    inner = '<select data-qid="' + q.id + '"><option value="">選択してください</option>' +
+      opts.map(function(o){
+        return '<option' + (value === o ? ' selected' : '') + '>' + esc(o) + '</option>';
+      }).join('') + '</select>';
+  } else if (q.type === 'checkbox') {
+    const cur = String(value || '').split('、');
+    inner = opts.map(function(o){
+      return '<div class="checkline"><input type="checkbox" data-qid="' + q.id + '" value="' + esc(o) + '"' +
+        (cur.indexOf(o) !== -1 ? ' checked' : '') + '><span>' + esc(o) + '</span></div>';
+    }).join('');
+  } else {
+    inner = '<input type="text" data-qid="' + q.id + '" value="' + esc(value || '') + '">';
+  }
+  return '<div class="field" data-qreq="' + (q.required ? '1' : '') + '" data-qlabel="' + esc(q.label) + '">' +
+    '<label>' + esc(q.label) + req + '</label>' + inner + '</div>';
+}
+
+function renderEntryForm(ctx){
+  setTab(ctx.mode === 'admin' ? 'admin' : null);
+  formCtx = ctx;
+  ctx.keepIds = (ctx.entry ? ctx.entry.photoIds.slice() : []);
+  ctx.newFiles = [];
+  const en = ctx.entry || {};
+  const ev = ctx.event;
+  const title = ctx.mode === 'apply' ? '出店申込' : '申込内容の編集';
+  const timeLine = (ev.openTime || ev.closeTime)
+    ? '<div class="ehtime">' + esc(fmtTimeRange(ev.openTime, ev.closeTime)) + '</div>'
+    : '';
+
+  let html =
+    (ctx.mode === 'admin'
+      ? '<button class="back" onclick="' + (ctx.returnTo === 'home' ? 'viewEvent(\'' + ev.id + '\')' : 'viewAdminEvent(\'' + ev.id + '\')') + '">‹ もどる</button>'
+      : '') +
+    '<div class="pagetitle">' + title + '</div>' +
+    '<div class="evhero">' +
+    '<div class="ehname">' + esc(ev.name) + '</div>' +
+    (ev.date ? '<div class="ehdate">' + esc(fmtDate(ev.date)) + '</div>' : '') +
+    timeLine +
+    (ev.description ? '<div class="ehdesc">' + esc(ev.description) + '</div>' : '') +
+    '</div>' +
+    (ctx.mode === 'apply' && ev.guideline
+      ? '<div class="section"><details class="guidebox" open><summary>開催概要</summary><div class="prewrap">' + esc(ev.guideline) + '</div></details></div>'
+      : '') +
+    '<div class="section">' +
+    '<div class="card">' +
+    '<div class="field"><label>お店・ブランド名<span class="req">必須</span></label>' +
+    '<input type="text" id="fShop" value="' + esc(en.shopName || '') + '" placeholder="例:IMAGINE.COFFEE"></div>' +
+    '<div class="field"><label>出店者名<span class="req">必須</span></label>' +
+    '<input type="text" id="fVendor" value="' + esc(en.vendorName || '') + '" placeholder="例:山田 花子"></div>' +
+    '<div class="field"><label>連絡先(電話番号)<span class="req">必須</span></label>' +
+    '<input type="tel" id="fPhone" value="' + esc(en.phone || '') + '" placeholder="例:090-1234-5678"></div>' +
+    '<div class="field"><label>Instagram ID</label>' +
+    '<input type="text" id="fInsta" value="' + esc(en.instagram || '') + '" placeholder="例:@imagine.coffee"></div>' +
+    '<div class="field"><label>メールアドレス<span class="req">必須</span></label>' +
+    '<input type="text" id="fEmail" inputmode="email" autocapitalize="off" value="' + esc(en.email || '') + '" placeholder="例:info@example.com"></div>' +
+    '<div class="field"><label>カテゴリ<span class="req">必須</span></label><select id="fCat"><option value="">選択してください</option>' +
+    ctx.categories.map(function(c){
+      return '<option' + (en.category === c ? ' selected' : '') + '>' + esc(c) + '</option>';
+    }).join('') + '</select></div>' +
+    '<div class="field"><label>当日提供する商品・サービス<span class="req">必須</span></label>' +
+    '<textarea id="fOffer" style="min-height:80px" placeholder="例:ドリップコーヒー、コーヒー豆の販売、試飲体験 など">' + esc(en.offering || '') + '</textarea></div>' +
+    '<div class="field"><label>紹介コメント(SNSで使用します)<span class="req">必須</span></label>' +
+    '<textarea id="fIntro" placeholder="お店の紹介、持っていくもの、意気込みなど">' + esc(en.intro || '') + '</textarea></div>' +
+    '<div class="field" style="margin-bottom:0"><label>運営への要望・連絡事項</label>' +
+    '<textarea id="fReq" style="min-height:80px">' + esc(en.request || '') + '</textarea></div>' +
+    '</div>';
+
+  if (ctx.questions.length) {
+    html += '<div class="card"><h3>このイベントの質問</h3>' +
+      ctx.questions.map(function(q){ return questionField(q, en.answers ? en.answers[q.id] : ''); }).join('') +
+      '</div>';
+  }
+
+  html += '<div class="card"><h3>写真(複数OK)</h3>' +
+    '<div class="photoadd" onclick="document.getElementById(\'fPhotos\').click()">＋ タップして写真を追加</div>' +
+    '<input type="file" id="fPhotos" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">' +
+    '<div class="thumbs" id="thumbs"></div>' +
+    '<div class="hint" style="margin-top:6px">お店や商品の写真。SNS紹介に使わせていただきます</div></div>';
+
+  html += '<button class="btn" id="fSubmit" onclick="submitEntryForm()">' +
+    (ctx.mode === 'apply' ? '入力内容を確認する' : '変更を保存する') + '</button>' +
+    '<div style="height:30px"></div></div>';
+
+  show(html);
+  if (ctx.mode !== 'admin') setMenuBtn(false);
+  renderThumbs();
+}
+
+function renderThumbs(){
+  const ctx = formCtx;
+  let html = ctx.keepIds.map(function(id, i){
+    return '<div class="thumb"><img src="' + photoUrl(id, 200) + '">' +
+      '<button class="del" onclick="formCtx.keepIds.splice(' + i + ',1);renderThumbs()">✕</button></div>';
+  }).join('');
+  html += ctx.newFiles.map(function(f, i){
+    return '<div class="thumb"><img src="' + URL.createObjectURL(f) + '">' +
+      '<button class="del" onclick="formCtx.newFiles.splice(' + i + ',1);renderThumbs()">✕</button></div>';
+  }).join('');
+  $('#thumbs').innerHTML = html;
+}
+
+function addPhotos(input){
+  const files = Array.prototype.slice.call(input.files || []);
+  let total = 0;
+  formCtx.newFiles.concat(files).forEach(function(f){ total += f.size; });
+  if (total > 20 * 1024 * 1024) { toast('写真の合計サイズが大きすぎます(20MBまで)'); input.value = ''; return; }
+  formCtx.newFiles = formCtx.newFiles.concat(files);
+  input.value = '';
+  renderThumbs();
+}
+
+function fileToB64(file){
+  return new Promise(function(res, rej){
+    const r = new FileReader();
+    r.onload = function(){ res(String(r.result).split(',')[1]); };
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function collectAnswers(){
+  const answers = {};
+  let missing = null;
+  document.querySelectorAll('[data-qreq]').forEach(function(fieldEl){
+    const qlabel = fieldEl.getAttribute('data-qlabel');
+    const required = fieldEl.getAttribute('data-qreq') === '1';
+    let val = '';
+    const checks = fieldEl.querySelectorAll('input[type=checkbox][data-qid]');
+    if (checks.length) {
+      const sel = [];
+      let qid = '';
+      checks.forEach(function(c){ qid = c.getAttribute('data-qid'); if (c.checked) sel.push(c.value); });
+      val = sel.join('、');
+      answers[qid] = val;
+    } else {
+      const el = fieldEl.querySelector('[data-qid]');
+      if (el) { val = el.value.trim(); answers[el.getAttribute('data-qid')] = val; }
+    }
+    if (required && !val && !missing) missing = qlabel;
+  });
+  if (missing) throw new Error('「' + missing + '」を入力してください');
+  return answers;
+}
+
+function submitEntryForm(){
+  const ctx = formCtx;
+  const shopName = $('#fShop').value.trim();
+  if (!shopName) { toast('お店・ブランド名を入力してください'); return; }
+  if (ctx.mode !== 'admin') {
+    const must = [
+      ['fVendor', '出店者名'], ['fPhone', '連絡先(電話番号)'], ['fEmail', 'メールアドレス'],
+      ['fCat', 'カテゴリ'], ['fOffer', '当日提供する商品・サービス'], ['fIntro', '紹介コメント'],
+    ];
+    for (let i = 0; i < must.length; i++) {
+      if (!$('#' + must[i][0]).value.trim()) { toast('「' + must[i][1] + '」を入力してください'); return; }
+    }
+    if ($('#fEmail').value.indexOf('@') === -1) { toast('メールアドレスの形式を確認してください'); return; }
+  }
+  let answers;
+  try { answers = collectAnswers(); } catch (e) { toast(e.message); return; }
+
+  if (ctx.mode === 'apply') { showConfirmSheet(answers); return; }
+  doSubmitEntry(answers);
+}
+
+function showConfirmSheet(answers){
+  const ctx = formCtx;
+  ctx.pendingAnswers = answers;
+  function line(k, v){
+    return '<div class="kv"><span class="k">' + esc(k) + '</span>' +
+      (v ? '<span class="v">' + esc(v) + '</span>' : '<span class="v" style="color:#bbb">未入力</span>') + '</div>';
+  }
+  const qlines = ctx.questions.map(function(q){ return line(q.label, answers[q.id]); }).join('');
+  const thumbs = ctx.newFiles.map(function(f){
+    return '<div class="thumb"><img src="' + URL.createObjectURL(f) + '"></div>';
+  }).join('');
+
+  openSheet(
+    '<div style="font-size:18px;font-weight:800;margin-bottom:4px">入力内容の確認</div>' +
+    '<div style="font-size:12px;color:var(--sub);margin-bottom:12px">この内容でよければ一番下のボタンで申込完了です</div>' +
+    '<div class="card">' +
+    line('お店・ブランド名', $('#fShop').value.trim()) +
+    line('出店者名', $('#fVendor').value.trim()) +
+    line('連絡先', $('#fPhone').value.trim()) +
+    line('Instagram', $('#fInsta').value.trim()) +
+    line('メール', $('#fEmail').value.trim()) +
+    line('カテゴリ', $('#fCat').value) +
+    line('提供内容', $('#fOffer').value.trim()) +
+    line('紹介コメント', $('#fIntro').value.trim()) +
+    line('要望・連絡', $('#fReq').value.trim()) +
+    '</div>' +
+    (qlines ? '<div class="card"><h3>イベントの質問</h3>' + qlines + '</div>' : '') +
+    (ctx.newFiles.length
+      ? '<div class="card"><h3>写真(' + ctx.newFiles.length + '枚)</h3><div class="thumbs">' + thumbs + '</div></div>'
+      : '<div class="card"><h3>写真</h3><div style="font-size:13px;color:var(--sub)">なし</div></div>') +
+    '<button class="btn" id="confirmSend" style="margin-bottom:8px" onclick="confirmSubmit()">この内容で申し込む</button>' +
+    '<button class="btn ghost" onclick="closeSheet()">修正する</button>'
+  );
+}
+
+function confirmSubmit(){
+  doSubmitEntry(formCtx.pendingAnswers);
+}
+
+function doSubmitEntry(answers){
+  const ctx = formCtx;
+  const shopName = $('#fShop').value.trim();
+  const btn = $('#confirmSend') || $('#fSubmit');
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = ctx.newFiles.length ? '写真をアップロード中…' : '送信中…';
+
+  Promise.all(ctx.newFiles.map(function(f){
+    return fileToB64(f).then(function(b64){ return { name: f.name, mime: f.type || 'image/jpeg', data: b64 }; });
+  })).then(function(photos){
+    const form = {
+      eventId: ctx.event.id, shopName: shopName,
+      vendorName: $('#fVendor').value.trim(), phone: $('#fPhone').value.trim(),
+      instagram: $('#fInsta').value.trim(), email: $('#fEmail').value.trim(),
+      offering: $('#fOffer').value,
+      category: $('#fCat').value, intro: $('#fIntro').value,
+      request: $('#fReq').value, answers: answers,
+      photos: photos, keepPhotoIds: ctx.keepIds,
+    };
+    if (ctx.mode === 'apply')  return gs('api_submitEntry', form);
+    if (ctx.mode === 'edit')   return gs('api_updateEntryByToken', ctx.token, form);
+    return gs('api_adminUpdateEntry', adminPin(), ctx.entry.id, form);
+  }).then(function(result){
+    if (ctx.mode === 'apply') {
+      viewApplyDone(result.editToken, ctx.event.name);
+    } else if (ctx.mode === 'edit') {
+      show('<div class="empty" style="padding-top:80px">変更を保存しました!<br><br>このページはもう閉じて大丈夫です。<br>また修正したいときは同じリンクからどうぞ。</div>');
+    } else {
+      state.events = {}; // キャッシュ破棄
+      toast('保存しました');
+      if (ctx.returnTo === 'home') viewEvent(ctx.event.id, true);
+      else viewAdminEvent(ctx.event.id);
+    }
+  }).catch(function(e){
+    btn.disabled = false;
+    btn.textContent = orig;
+    toast(e.message);
+  });
+}
+
+// ---------------- 申込ページ入口 ----------------
+function viewApply(eventId){
+  setTab(null);
+  show(loadingHTML());
+  gs('api_getEvent', eventId).then(function(data){
+    state.events[eventId] = data;
+    if (data.event.status !== 'open') {
+      show('<div class="empty" style="padding-top:80px">「' + esc(data.event.name) + '」の<br>出店申込は締め切られました。<br><br>ありがとうございました!</div>');
+      return;
+    }
+    renderEntryForm({ mode: 'apply', event: data.event, questions: data.questions, categories: data.categories, entry: null });
+  }).catch(function(e){ show(errHTML(e)); });
+}
+
+function viewApplyDone(token, eventName){
+  const editUrl = BOOT.appUrl + '?p=edit&t=' + token;
+  show(
+    '<div style="text-align:center;font-size:19px;font-weight:800;padding-top:56px">申込ありがとうございます!</div>' +
+    '<div style="text-align:center;font-size:13px;color:var(--sub);padding:6px 24px 24px">「' + esc(eventName) + '」への出店申込を受け付けました。</div>' +
+    '<div class="section"><div class="card" style="background:#fffbe8">' +
+    '<h3>重要:編集リンクの保存</h3>' +
+    '<div style="font-size:13px;margin-bottom:10px">申込内容をあとから修正できる「編集リンク」です。<b>必ずコピーしてメモなどに保存してください。</b></div>' +
+    '<div style="font-size:11px;word-break:break-all;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px">' + esc(editUrl) + '</div>' +
+    '<button class="btn" onclick="copyEditUrl()">編集リンクをコピー</button>' +
+    '</div></div>'
+  );
+  window._editUrl = editUrl;
+}
+function copyEditUrl(){ copyText(window._editUrl, '編集リンクをコピーしました'); }
+
+// ---------------- 編集ページ入口(トークン) ----------------
+function viewEditByToken(token){
+  setTab(null);
+  show(loadingHTML());
+  gs('api_getEntryForEdit', token).then(function(data){
+    renderEntryForm({ mode: 'edit', token: token, event: data.event, questions: data.questions, categories: data.categories, entry: data.entry });
+  }).catch(function(e){ show(errHTML(e)); });
+}
+// ================================================================
+// 管理画面
+// ================================================================
+function adminPin(){ return state.pin; }
+function adminLogout(){ state.pin = ''; sessionStorage.removeItem('portal_pin'); goAdmin(); }
+function adminCatch(e){
+  if (String(e.message).indexOf('PIN') !== -1) { state.pin = ''; sessionStorage.removeItem('portal_pin'); }
+  toast(e.message);
+  goAdmin();
+}
+
+function goAdmin(){
+  closeMenu();
+  setTab('admin');
+  if (!state.pin) {
+    show(
+      '<div style="text-align:center;font-size:18px;font-weight:800;margin:64px 0 18px">管理画面</div>' +
+      '<div class="section"><div class="card">' +
+      '<div class="field"><label>PINコード</label>' +
+      '<input type="password" id="pinInput" inputmode="numeric" placeholder="数字4〜8桁" style="text-align:center;letter-spacing:.3em;font-size:20px"></div>' +
+      '<button class="btn" onclick="submitPin()">ログイン</button></div>' +
+      '<button class="btn ghost" onclick="viewHome()">ホームにもどる</button></div>'
+    );
+    return;
+  }
+  viewAdminDashboard();
+}
+
+function submitPin(){
+  const pin = $('#pinInput').value.trim();
+  if (!pin) return;
+  gs('api_adminLogin', pin).then(function(){
+    state.pin = pin;
+    sessionStorage.setItem('portal_pin', pin);
+    viewAdminDashboard();
+  }).catch(function(e){ toast(e.message); });
+}
+
+function viewAdminDashboard(){
+  setTab('admin');
+  show(loadingHTML());
+  gs('api_adminGetData', adminPin()).then(function(data){
+    state.adminData = data;
+    let rows = '';
+    if (data.events.length) {
+      rows = '<div class="rows">' + data.events.map(function(ev){
+        return '<button class="row" onclick="viewAdminEvent(\'' + ev.id + '\')">' +
+          '<span class="mono">' + esc(initialOf(ev.name)) + '</span>' +
+          '<span class="rbody"><span class="rname">' + esc(ev.name) + '</span><br>' +
+          '<span class="rsub">' + esc(fmtDate(ev.date)) + ' ・ ' + ev.entryCount + '店<br>' +
+          (ev.status === 'open' ? '<span class="badge open">募集中</span>' : '<span class="badge closed">締切</span>') +
+          (!ev.visible ? '<span class="badge hidden">非表示</span>' : '') +
+          (ev.isPublic ? '<span class="badge pub">一般公開</span>' : '') +
+          '</span></span><span class="chev">›</span></button>';
+      }).join('') + '</div>';
+    } else {
+      rows = '<div class="empty">イベントがまだありません</div>';
+    }
+    show(
+      '<div style="height:14px"></div>' +
+      '<div class="pagetitle">管理画面</div>' +
+      '<div class="section">' +
+      '<div class="btnrow" style="margin-bottom:14px">' +
+      '<button class="btn" onclick="viewAdminEventForm(null)">＋ 新しいイベント</button>' +
+      '<button class="btn ghost" onclick="viewAdminSettings()">設定</button></div></div>' +
+      '<div class="pagesub">イベント(非表示含む)</div>' +
+      '<div class="section" style="padding:0">' + rows.replace('class="rows"','class="rows" style="margin:0 14px 14px"') + '</div>' +
+      '<div class="section"><button class="btn ghost" onclick="adminLogout()">ログアウト</button></div>'
+    );
+  }).catch(adminCatch);
+}
+
+// ---------------- イベント管理 ----------------
+function viewAdminEvent(eventId){
+  setTab('admin');
+  show(loadingHTML());
+  gs('api_adminGetEvent', adminPin(), eventId).then(function(data){
+    state.adminEvent = data;
+    const ev = data.event;
+    const applyUrl = BOOT.appUrl + '?p=apply&e=' + ev.id;
+
+    const entryRows = data.entries.length
+      ? '<div class="rows" style="margin:0 0 4px">' + data.entries.map(function(en){
+          return '<button class="row" style="padding:12px 14px" onclick="openAdminEntry(\'' + en.id + '\')">' +
+            '<span class="mono">' + esc(initialOf(en.shopName)) + '</span>' +
+            '<span class="rbody"><span class="rname" style="font-size:14px">' + esc(en.shopName) + '</span><br>' +
+            '<span class="rsub">' + esc(en.category || '未分類') + (en.posted ? ' ・ ✓投稿済' : '') + '</span></span>' +
+            '<span class="chev">›</span></button>';
+        }).join('') + '</div>'
+      : '<div class="empty" style="padding:20px">まだ申込がありません</div>';
+
+    const trashRows = data.trashed.length
+      ? '<div class="card"><h3>ゴミ箱</h3>' + data.trashed.map(function(en){
+          return '<div class="kv"><span class="v">' + esc(en.shopName) + '</span>' +
+            '<button class="btn mini ghost" onclick="setEntryStatus(\'' + en.id + '\',\'active\')">復元</button></div>';
+        }).join('') + '</div>'
+      : '';
+
+    show(
+      '<button class="back" onclick="viewAdminDashboard()">‹ 管理画面</button>' +
+      crumb('管理 › イベント') +
+      '<div class="pagetitle">' + esc(ev.name) + '</div>' +
+      '<div class="pagesub">' + esc(fmtDate(ev.date)) + ' ・ ' + data.entries.length + '店</div>' +
+      '<div class="section">' +
+
+      '<div class="card"><h3>出店申込URL(出店者に配る)</h3>' +
+      '<div style="font-size:11px;word-break:break-all;background:#f6f6f8;border-radius:10px;padding:10px;margin-bottom:10px">' + esc(applyUrl) + '</div>' +
+      '<div class="btnrow">' +
+      '<button class="btn" onclick="copyText(window._applyUrl,\'申込URLをコピーしました\')">URLをコピー</button>' +
+      '<a class="btn ghost" href="' + esc(applyUrl) + '" target="_blank">開く</a></div></div>' +
+
+      '<div class="card" style="padding:6px 16px">' +
+      switchLine('募集を受付中', 'OFFにすると申込を締め切ります', ev.status === 'open', 'qtStatus') +
+      switchLine('ポータルに表示', 'OFFにするとホームに出ません', ev.visible, 'qtVisible') +
+      switchLine('一般公開', '将来の来場者向け公開用フラグ', ev.isPublic, 'qtPublic') +
+      '</div>' +
+
+      '<div class="btnrow" style="margin-bottom:14px">' +
+      '<button class="btn ghost" onclick="viewAdminEventForm(\'' + ev.id + '\')">編集・質問設定</button>' +
+      '<button class="btn ghost" onclick="viewAdminSummary(\'' + ev.id + '\')">集計</button></div>' +
+      '<button class="btn ghost" style="margin-bottom:8px" onclick="viewAdminMail(\'' + ev.id + '\')">出店者に案内メールを送る</button>' +
+      '<button class="btn ghost" style="margin-bottom:14px" onclick="viewEvent(\'' + ev.id + '\', true)">ポータルでこのイベントを見る ›</button>' +
+
+      '<h3 style="font-size:14px;color:var(--sub);margin:4px 2px 10px">出店者一覧(タップで詳細・編集)</h3>' +
+      entryRows + trashRows +
+      '</div>'
+    );
+    window._applyUrl = applyUrl;
+    bindQuickToggle('qtStatus', function(on){ return { status: on ? 'open' : 'closed' }; });
+    bindQuickToggle('qtVisible', function(on){ return { visible: on }; });
+    bindQuickToggle('qtPublic', function(on){ return { isPublic: on }; });
+  }).catch(adminCatch);
+}
+
+function switchLine(label, desc, on, id){
+  return '<div class="switchline"><div><div class="sl">' + label + '</div><div class="sd">' + desc + '</div></div>' +
+    '<label class="sw"><input type="checkbox" id="' + id + '"' + (on ? ' checked' : '') + '><i></i></label></div>';
+}
+
+function bindQuickToggle(id, toPatch){
+  const el = $('#' + id);
+  if (!el) return;
+  el.addEventListener('change', function(){
+    const patch = toPatch(el.checked);
+    gs('api_adminUpdateEventFields', adminPin(), state.adminEvent.event.id, patch)
+      .then(function(){
+        toast('変更しました');
+        state.home = null; state.events = {};
+      })
+      .catch(function(e){ el.checked = !el.checked; toast(e.message); });
+  });
+}
+
+function setEntryStatus(entryId, status){
+  gs('api_adminSetEntryStatus', adminPin(), entryId, status).then(function(){
+    state.events = {}; state.home = null;
+    toast(status === 'trash' ? 'ゴミ箱に移動しました' : '復元しました');
+    closeSheet();
+    viewAdminEvent(state.adminEvent.event.id);
+  }).catch(function(e){ toast(e.message); });
+}
+
+function openAdminEntry(entryId){
+  const data = state.adminEvent;
+  const en = data.entries.filter(function(e){ return e.id === entryId; })[0];
+  if (!en) return;
+  const editUrl = BOOT.appUrl + '?p=edit&t=' + en.editToken;
+  window._venEditUrl = editUrl;
+  openSheet(
+    '<div style="font-size:19px;font-weight:800;margin-bottom:12px">' + esc(en.shopName) + '</div>' +
+    (en.request ? '<div class="card" style="background:#fffbe8"><h3>要望</h3><div class="prewrap" style="font-size:13px">' + esc(en.request) + '</div></div>' : '') +
+    ((en.vendorName || en.phone) ? '<div class="card"><h3>出店者情報</h3>' +
+      (en.vendorName ? '<div class="kv"><span class="k">出店者名</span><span class="v">' + esc(en.vendorName) + '</span></div>' : '') +
+      (en.phone ? '<div class="kv"><span class="k">連絡先</span><span class="v">' + esc(en.phone) + '</span></div>' : '') + '</div>' : '') +
+    '<button class="btn" style="margin-bottom:8px" onclick="adminEditEntry(\'' + en.id + '\')">内容を編集する</button>' +
+    '<button class="btn ghost" style="margin-bottom:8px" onclick="copyText(window._venEditUrl,\'編集リンクをコピーしました\')">出店者用の編集リンクをコピー</button>' +
+    '<button class="btn danger" style="margin-bottom:8px" onclick="setEntryStatus(\'' + en.id + '\',\'trash\')">ゴミ箱へ移動</button>' +
+    '<button class="btn ghost" onclick="closeSheet()">閉じる</button>'
+  );
+}
+
+function adminEditEntry(entryId){
+  closeSheet();
+  const data = state.adminEvent;
+  const en = data.entries.filter(function(e){ return e.id === entryId; })[0];
+  renderEntryForm({ mode: 'admin', event: data.event, questions: data.questions, categories: data.categories, entry: en });
+}
+
+// ---------------- イベント作成・編集フォーム ----------------
+let qb = []; // 質問ビルダー [{id,label,type,options,required}]
+
+function viewAdminEventForm(eventId){
+  setTab('admin');
+  const isNew = !eventId;
+  if (isNew) {
+    qb = [];
+    renderEventForm(null);
+  } else {
+    const data = state.adminEvent;
+    if (data && data.event.id === eventId) {
+      qb = data.questions.map(function(q){ return { id: q.id, label: q.label, type: q.type, options: q.options, required: q.required }; });
+      renderEventForm(data.event);
+    } else {
+      show(loadingHTML());
+      gs('api_adminGetEvent', adminPin(), eventId).then(function(d){
+        state.adminEvent = d;
+        qb = d.questions.map(function(q){ return { id: q.id, label: q.label, type: q.type, options: q.options, required: q.required }; });
+        renderEventForm(d.event);
+      }).catch(adminCatch);
+    }
+  }
+}
+
+function renderEventForm(ev){
+  const isNew = !ev;
+  const copySel = isNew && state.adminData && state.adminData.events.length
+    ? '<div class="card" style="background:#f0f6ff"><h3>前回の設定をコピー</h3>' +
+      '<div class="field" style="margin-bottom:0"><select id="evCopy" onchange="copyFromEvent(this.value)">' +
+      '<option value="">コピーしない(まっさらから作る)</option>' +
+      state.adminData.events.map(function(e){ return '<option value="' + e.id + '">' + esc(e.name) + '</option>'; }).join('') +
+      '</select><div class="hint">質問と投稿テンプレートを引き継ぎます</div></div></div>'
+    : '';
+
+  show(
+    '<button class="back" onclick="' + (isNew ? 'viewAdminDashboard()' : 'viewAdminEvent(\'' + ev.id + '\')') + '">‹ もどる</button>' +
+    crumb(isNew ? '管理 › 新規イベント' : '管理 › ' + esc(ev.name) + ' › 編集') +
+    '<div class="pagetitle">' + (isNew ? '新しいイベント' : 'イベントを編集') + '</div>' +
+    '<div class="section">' + copySel +
+    '<div class="card">' +
+    '<div class="field"><label>イベント名<span class="req">必須</span></label>' +
+    '<input type="text" id="evName" value="' + esc(ev ? ev.name : '') + '" placeholder="例:夏の松江大朝市 2026"></div>' +
+    '<div class="field"><label>開催日</label><input type="date" id="evDate" value="' + esc(ev ? ev.date : '') + '"></div>' +
+    '<div class="btnrow">' +
+    '<div class="field" style="flex:1"><label>OPEN時間</label><input type="time" id="evOpen" value="' + esc(ev ? ev.openTime : '') + '"></div>' +
+    '<div class="field" style="flex:1"><label>CLOSE時間</label><input type="time" id="evClose" value="' + esc(ev ? ev.closeTime : '') + '"></div></div>' +
+    '<div class="field" style="margin-bottom:0"><label>説明(任意)</label>' +
+    '<textarea id="evDesc" style="min-height:70px" placeholder="場所や時間など">' + esc(ev ? ev.description : '') + '</textarea></div></div>' +
+
+    '<div class="card"><h3>開催概要</h3>' +
+    '<div class="field" style="margin-bottom:0">' +
+    '<textarea id="evGuide" style="min-height:160px" placeholder="出店申込ページの先頭にアコーディオンで表示されます。【見出し】のように区切ると読みやすくなります">' + esc(ev ? ev.guideline : '') + '</textarea>' +
+    '<div class="hint">出店者向けの詳しい案内文(日時・場所・出店料・提出物など)。改行はそのまま表示されます</div></div></div>' +
+
+    '<div class="card"><h3>ストーリー投稿テンプレート</h3>' +
+    '<div class="field" style="margin-bottom:0">' +
+    '<textarea id="evTpl" style="min-height:90px" placeholder="{店名}&#10;{インスタID}&#10;{紹介文}&#10;#マルシェ">' + esc(ev ? ev.template : '') + '</textarea>' +
+    '<div class="hint">{店名} {インスタID} {紹介文} {カテゴリ} {イベント名} が自動で置き換わります。空欄なら「店名+インスタID+紹介文」</div></div></div>' +
+
+    '<div class="card"><h3>このイベントの追加質問</h3>' +
+    '<div id="qbList"></div>' +
+    '<button class="btn ghost mini" onclick="qbAdd()">＋ 質問を追加</button>' +
+    '<div class="hint" style="margin-top:8px">店名・出店者名・連絡先・Instagram・メール・カテゴリ・提供内容・紹介文・写真・要望は毎回自動で入ります。ここにはイベント固有の質問だけ(例:テント持参の有無)</div></div>' +
+
+    '<button class="btn" id="evSave" onclick="saveAdminEvent(' + (isNew ? 'null' : '\'' + ev.id + '\'') + ')">' + (isNew ? 'イベントを作成する' : '保存する') + '</button>' +
+    '<div style="height:30px"></div></div>'
+  );
+  renderQb();
+}
+
+function copyFromEvent(srcId){
+  if (!srcId) { qb = []; renderQb(); return; }
+  gs('api_adminGetEvent', adminPin(), srcId).then(function(d){
+    qb = d.questions.map(function(q){ return { label: q.label, type: q.type, options: q.options, required: q.required }; });
+    $('#evTpl').value = d.event.template || '';
+    renderQb();
+    toast('「' + d.event.name + '」の設定をコピーしました');
+  }).catch(function(e){ toast(e.message); });
+}
+
+const QTYPES = [['text','短い記述'],['textarea','長い記述'],['select','択一選択'],['checkbox','複数選択']];
+
+function renderQb(){
+  $('#qbList').innerHTML = qb.map(function(q, i){
+    const needsOpts = q.type === 'select' || q.type === 'checkbox';
+    return '<div class="qcard">' +
+      '<div class="qtop">' +
+      '<input type="text" placeholder="質問文(例:テーブルは何台必要?)" value="' + esc(q.label) + '" oninput="qb[' + i + '].label=this.value">' +
+      '<button class="qbtn" onclick="qbMove(' + i + ',-1)">↑</button>' +
+      '<button class="qbtn" onclick="qbMove(' + i + ',1)">↓</button>' +
+      '<button class="qbtn" onclick="qb.splice(' + i + ',1);renderQb()">✕</button></div>' +
+      '<select onchange="qb[' + i + '].type=this.value;renderQb()">' +
+      QTYPES.map(function(t){ return '<option value="' + t[0] + '"' + (q.type === t[0] ? ' selected' : '') + '>' + t[1] + '</option>'; }).join('') +
+      '</select>' +
+      (needsOpts ? '<input class="qops" type="text" placeholder="選択肢をカンマ区切りで(例:1台,2台,不要)" value="' + esc(q.options) + '" oninput="qb[' + i + '].options=this.value">' : '') +
+      '<div class="qfoot"><label class="checkline" style="padding:0"><input type="checkbox"' + (q.required ? ' checked' : '') + ' onchange="qb[' + i + '].required=this.checked"><span>必須にする</span></label></div>' +
+      '</div>';
+  }).join('') || '<div style="font-size:13px;color:var(--sub);margin-bottom:10px">追加質問はまだありません</div>';
+}
+
+function qbAdd(){ qb.push({ label: '', type: 'text', options: '', required: false }); renderQb(); }
+function qbMove(i, d){
+  const j = i + d;
+  if (j < 0 || j >= qb.length) return;
+  const t = qb[i]; qb[i] = qb[j]; qb[j] = t;
+  renderQb();
+}
+
+function saveAdminEvent(eventId){
+  const name = $('#evName').value.trim();
+  if (!name) { toast('イベント名を入力してください'); return; }
+  for (let i = 0; i < qb.length; i++) {
+    if (!qb[i].label.trim()) { toast('空の質問があります(' + (i + 1) + '番目)'); return; }
+  }
+  const btn = $('#evSave');
+  btn.disabled = true; btn.textContent = '保存中…';
+  const evData = {
+    id: eventId || '',
+    name: name,
+    date: $('#evDate').value,
+    openTime: $('#evOpen').value,
+    closeTime: $('#evClose').value,
+    description: $('#evDesc').value,
+    guideline: $('#evGuide').value,
+    template: $('#evTpl').value,
+    status: eventId && state.adminEvent ? state.adminEvent.event.status : 'open',
+    visible: eventId && state.adminEvent ? state.adminEvent.event.visible : true,
+    isPublic: eventId && state.adminEvent ? state.adminEvent.event.isPublic : false,
+  };
+  gs('api_adminSaveEvent', adminPin(), evData, qb).then(function(r){
+    state.home = null; state.events = {};
+    toast(eventId ? '保存しました' : 'イベントを作成しました!');
+    viewAdminEvent(r.eventId);
+  }).catch(function(e){
+    btn.disabled = false; btn.textContent = eventId ? '保存する' : 'イベントを作成する';
+    toast(e.message);
+  });
+}
+
+// ---------------- 案内メール ----------------
+function viewAdminMail(eventId){
+  setTab('admin');
+  if (state.adminEvent && state.adminEvent.event.id === eventId) { renderAdminMail(eventId); return; }
+  show(loadingHTML());
+  gs('api_adminGetEvent', adminPin(), eventId).then(function(d){
+    state.adminEvent = d;
+    renderAdminMail(eventId);
+  }).catch(adminCatch);
+}
+
+function renderAdminMail(eventId){
+  const data = state.adminEvent;
+  const rows = data.entries.map(function(en){
+    const has = !!en.email;
+    return '<label class="checkline" style="' + (has ? '' : 'opacity:.45') + '">' +
+      '<input type="checkbox" class="mailsel" value="' + en.id + '"' + (has ? ' checked' : ' disabled') + '>' +
+      '<span style="flex:1">' + esc(en.shopName) +
+      '<br><span style="font-size:11px;color:var(--sub)">' + (has ? esc(en.email) : 'メール未登録') + '</span></span></label>';
+  }).join('');
+
+  show(
+    '<button class="back" onclick="viewAdminEvent(\'' + eventId + '\')">‹ もどる</button>' +
+    crumb('管理 › ' + esc(data.event.name) + ' › 案内メール') +
+    '<div class="pagetitle">案内メール</div>' +
+    '<div class="section">' +
+    '<div class="card"><h3>送信先(タップで選択)</h3>' +
+    (rows || '<div class="empty" style="padding:10px">出店者がいません</div>') +
+    '<button class="btn ghost mini" style="margin-top:8px" onclick="toggleAllMail()">全選択 / 全解除</button></div>' +
+    '<div class="card">' +
+    '<div class="field"><label>件名</label><input type="text" id="mailSubj" placeholder="例:出店者説明会のご案内"></div>' +
+    '<div class="field" style="margin-bottom:0"><label>本文</label>' +
+    '<textarea id="mailBody" style="min-height:150px" placeholder="本文を入力してください"></textarea>' +
+    '<div class="hint">各メールの冒頭に<br>「店舗名(改行)出店者名 様」<br>が自動で入ります。送信元はポータルのGoogleアカウント(無料プランは1日約100通まで)</div></div></div>' +
+    '<button class="btn" id="mailSend" onclick="sendAdminMail(\'' + eventId + '\')">送信する</button>' +
+    '<div style="height:30px"></div></div>'
+  );
+}
+
+function toggleAllMail(){
+  const boxes = document.querySelectorAll('.mailsel:not(:disabled)');
+  let anyOff = false;
+  boxes.forEach(function(b){ if (!b.checked) anyOff = true; });
+  boxes.forEach(function(b){ b.checked = anyOff; });
+}
+
+function sendAdminMail(eventId){
+  const ids = [];
+  document.querySelectorAll('.mailsel:checked').forEach(function(b){ ids.push(b.value); });
+  const subj = $('#mailSubj').value.trim();
+  const body = $('#mailBody').value.trim();
+  if (!ids.length) { toast('送信先を選んでください'); return; }
+  if (!subj || !body) { toast('件名と本文を入力してください'); return; }
+  if (!confirm(ids.length + '件にメールを送信します。よろしいですか?')) return;
+  const btn = $('#mailSend');
+  btn.disabled = true; btn.textContent = '送信中…';
+  gs('api_adminSendMail', adminPin(), eventId, ids, subj, body).then(function(r){
+    toast('送信しました(' + r.sent + '件' + (r.skipped ? '・送れなかったもの' + r.skipped + '件' : '') + ')');
+    viewAdminEvent(eventId);
+  }).catch(function(e){
+    btn.disabled = false; btn.textContent = '送信する';
+    toast(e.message);
+  });
+}
+
+// ---------------- 集計 ----------------
+function viewAdminSummary(eventId){
+  setTab('admin');
+  show(loadingHTML('集計中…'));
+  gs('api_adminGetSummary', adminPin(), eventId).then(function(s){
+    function bars(counts){
+      const max = Math.max.apply(null, Object.keys(counts).map(function(k){ return counts[k]; }).concat([1]));
+      return Object.keys(counts).map(function(k){
+        return '<div class="bar"><span class="blabel">' + esc(k) + '</span>' +
+          '<span class="btrack"><span class="bfill" style="width:' + Math.round(counts[k] / max * 100) + '%"></span></span>' +
+          '<span class="bnum">' + counts[k] + '</span></div>';
+      }).join('');
+    }
+    let html =
+      '<button class="back" onclick="viewAdminEvent(\'' + eventId + '\')">‹ もどる</button>' +
+      crumb('管理 › ' + esc(s.eventName) + ' › 集計') +
+      '<div class="pagetitle">集計</div>' +
+      '<div class="pagesub">' + esc(s.eventName) + '</div>' +
+      '<div class="section">' +
+      '<div class="card"><div style="display:flex;text-align:center">' +
+      '<div style="flex:1"><div style="font-size:28px;font-weight:800">' + s.total + '</div><div style="font-size:11px;color:var(--sub)">申込数</div></div>' +
+      '<div style="flex:1"><div style="font-size:28px;font-weight:800">' + s.posted + '</div><div style="font-size:11px;color:var(--sub)">投稿済み</div></div>' +
+      '<div style="flex:1"><div style="font-size:28px;font-weight:800">' + (s.total - s.posted) + '</div><div style="font-size:11px;color:var(--sub)">未投稿</div></div>' +
+      '</div></div>' +
+      '<div class="card"><h3>カテゴリ内訳</h3>' + (Object.keys(s.byCategory).length ? bars(s.byCategory) : '<div class="empty" style="padding:10px">データなし</div>') + '</div>';
+
+    s.questions.forEach(function(q){
+      if (q.counts) {
+        html += '<div class="card"><h3>' + esc(q.label) + '</h3>' + bars(q.counts) + '</div>';
+      } else if (q.values && q.values.length) {
+        html += '<div class="card"><h3>' + esc(q.label) + '</h3>' +
+          q.values.map(function(v){ return '<div class="kv"><span class="k">' + esc(v.shopName) + '</span><span class="v">' + esc(v.value) + '</span></div>'; }).join('') +
+          '</div>';
+      }
+    });
+
+    if (s.requests.length) {
+      html += '<div class="card" style="background:#fffbe8"><h3>運営への要望一覧</h3>' +
+        s.requests.map(function(r){ return '<div class="kv"><span class="k">' + esc(r.shopName) + '</span><span class="v">' + esc(r.request) + '</span></div>'; }).join('') +
+        '</div>';
+    }
+    html += '</div>';
+    show(html);
+  }).catch(adminCatch);
+}
+
+// ---------------- 設定 ----------------
+function viewAdminSettings(){
+  setTab('admin');
+  const c = (state.adminData && state.adminData.config) || { siteTitle: '', categories: '', slackWebhook: '', siteUrl: '' };
+  show(
+    '<button class="back" onclick="viewAdminDashboard()">‹ 管理画面</button>' +
+    crumb('管理 › 設定') +
+    '<div class="pagetitle">設定</div>' +
+    '<div class="section">' +
+    '<div class="card">' +
+    '<div class="field"><label>サイト名</label><input type="text" id="cfTitle" value="' + esc(c.siteTitle) + '"></div>' +
+    '<div class="field" style="margin-bottom:0"><label>カテゴリ一覧</label>' +
+    '<textarea id="cfCats" style="min-height:70px">' + esc(c.categories) + '</textarea>' +
+    '<div class="hint">カンマ区切り。申込フォームの選択肢になります</div></div></div>' +
+
+    '<div class="card"><h3>公開URL</h3>' +
+    '<div class="field" style="margin-bottom:0"><label>GitHub PagesのURL(任意)</label>' +
+    '<input type="url" id="cfSiteUrl" value="' + esc(c.siteUrl) + '" placeholder="https://(アカウント名).github.io/(リポジトリ名)/">' +
+    '<div class="hint">設定すると、出店申込URLや編集リンクがこちらのURLで発行されます(Googleのバナーが出なくなります)。末尾に / を付けてください</div></div></div>' +
+
+    '<div class="card"><h3>Slack通知</h3>' +
+    '<div class="field"><label>Webhook URL</label>' +
+    '<input type="url" id="cfSlack" value="' + esc(c.slackWebhook) + '" placeholder="https://hooks.slack.com/services/…">' +
+    '<div class="hint">設定すると申込時にSlackへ通知。発行方法は手順書参照</div></div>' +
+    '<button class="btn ghost mini" onclick="testSlack()">テスト送信</button></div>' +
+
+    '<div class="card"><h3>PIN変更</h3>' +
+    '<div class="field" style="margin-bottom:0"><label>新しいPIN(変更時のみ入力)</label>' +
+    '<input type="password" id="cfPin" inputmode="numeric" placeholder="数字4〜8桁"></div></div>' +
+
+    '<button class="btn" id="cfSave" onclick="saveSettings()">設定を保存</button>' +
+    '<div style="height:30px"></div></div>'
+  );
+}
+
+function saveSettings(){
+  const btn = $('#cfSave');
+  btn.disabled = true; btn.textContent = '保存中…';
+  const cfg = {
+    siteTitle: $('#cfTitle').value.trim(),
+    categories: $('#cfCats').value.trim(),
+    slackWebhook: $('#cfSlack').value.trim(),
+    siteUrl: $('#cfSiteUrl').value.trim(),
+  };
+  const newPin = $('#cfPin').value.trim();
+  if (newPin) cfg.newPin = newPin;
+  gs('api_adminSaveConfig', adminPin(), cfg).then(function(){
+    if (newPin) { state.pin = newPin; sessionStorage.setItem('portal_pin', newPin); }
+    state.home = null; state.events = {}; state.adminData = null;
+    BOOT.siteTitle = cfg.siteTitle || BOOT.siteTitle;
+    BOOT.appUrl = cfg.siteUrl || BOOT.appUrl;
+    $('#siteTitleText').textContent = BOOT.siteTitle;
+    toast('設定を保存しました');
+    viewAdminDashboard();
+  }).catch(function(e){
+    btn.disabled = false; btn.textContent = '設定を保存';
+    toast(e.message);
+  });
+}
+
+function testSlack(){
+  const url = $('#cfSlack').value.trim();
+  gs('api_adminSaveConfig', adminPin(), { slackWebhook: url })
+    .then(function(){ return gs('api_adminTestSlack', adminPin()); })
+    .then(function(){ toast('Slackにテスト通知を送りました'); })
+    .catch(function(e){ toast(e.message); });
+}
+
 </script>
 </body>
 </html>
